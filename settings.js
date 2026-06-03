@@ -2,10 +2,11 @@ const t = window.TrelloPowerUp.iframe();
 
 const loading = document.getElementById('loading');
 const container = document.getElementById('lists-container');
+const footer = document.getElementById('footer'); // Target the new footer container
 const saveBtn = document.getElementById('save-btn');
 
 try {
-  // 🚨 NEW LOGIC: Just read the data that client.js securely handed to us!
+  // Read the data that client.js handed to us
   const lists = t.arg('lists') || [];
   const customFields = t.arg('customFields') || [];
   const savedSettings = t.arg('savedSettings') || {};
@@ -42,9 +43,9 @@ try {
       container.appendChild(details);
     });
     
-    // Show the Interface
+    // 🚨 Reveal the Interface and the new flexbox footer!
     loading.style.display = 'none';
-    saveBtn.style.display = 'block';
+    footer.style.display = 'flex';
   }
 
   // Save the user's choices
