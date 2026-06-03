@@ -2,7 +2,7 @@ const t = window.TrelloPowerUp.iframe();
 
 const loading = document.getElementById('loading');
 const container = document.getElementById('lists-container');
-const footer = document.getElementById('footer'); // Target the new footer container
+const footer = document.getElementById('footer');
 const saveBtn = document.getElementById('save-btn');
 
 try {
@@ -43,7 +43,7 @@ try {
       container.appendChild(details);
     });
     
-    // 🚨 Reveal the Interface and the new flexbox footer!
+    // Reveal the Interface and the footer!
     loading.style.display = 'none';
     footer.style.display = 'flex';
   }
@@ -61,13 +61,25 @@ try {
       newSettings[lId].push(cfId);
     });
     
+    // 🚨 NEW LOGIC: Try to save, but catch the error if Trello blocks it!
     t.set('board', 'shared', 'listFieldSettings', newSettings)
     .then(function() {
-      t.closePopup();
+      // If successful, close the pop-up
+      return t.closePopup();
+    })
+    .catch(function(error) {
+      // If Trello blocks it, turn the button red and print the error to the screen
+      saveBtn.innerText = "Save Failed!";
+      saveBtn.style.backgroundColor = "#EB5A46"; // Trello Red
+      saveBtn.style.color = "white";
+      
+      loading.innerText = "Trello Error: " + (error.message || JSON.stringify(error));
+      loading.style.display = 'block';
+      loading.style.color = '#EB5A46';
+      loading.style.fontWeight = 'bold';
     });
   });
 
 } catch (error) {
   loading.innerText = "Fatal JS Error: " + (error.message || error);
 }
- 
