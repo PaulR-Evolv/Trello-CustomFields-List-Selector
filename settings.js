@@ -49,9 +49,12 @@ try {
   // Save the user's choices
   saveBtn.addEventListener('click', function() {
     saveBtn.innerText = "Saving...";
-    let newSettings = {};
+    // Clear out any old error or success classes before running
+    saveBtn.classList.remove('save-success', 'save-failed');
     
+    let newSettings = {};
     let checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
+    
     checkboxes.forEach(box => {
       let lId = box.dataset.listId;
       let cfId = box.dataset.cfId;
@@ -61,23 +64,22 @@ try {
     
     t.set('board', 'shared', 'listFieldSettings', newSettings)
     .then(function() {
-      // 1. Turn green instantly on success
+      // 1. Swap text and trigger the ultra-stable green CSS class
       saveBtn.innerText = "✅ Saved Successfully!";
-      saveBtn.style.backgroundColor = "#61BD4F"; // Trello Green
-      saveBtn.style.borderColor = "#61BD4F";
-      saveBtn.style.color = "white";
+      saveBtn.classList.add('save-success');
       
-      // 2. Wait exactly 2 seconds, then execute the ironclad reset
-      setTimeout(function() {
+      // 2. Safety: Clear any old active timers so they don't fight
+      if (window.buttonTimer) clearTimeout(window.buttonTimer);
+      
+      // 3. Wait exactly 2 seconds, then cleanly revert back to original blue state
+      window.buttonTimer = setTimeout(function() {
         saveBtn.innerText = "Save Display Settings";
-        // 🚨 Wipes out ALL temporary inline styles completely, restoring the native Trello blue
-        saveBtn.style.cssText = ""; 
+        saveBtn.classList.remove('save-success');
       }, 2000);
     })
     .catch(function(error) {
       saveBtn.innerText = "Save Failed!";
-      saveBtn.style.backgroundColor = "#EB5A46"; 
-      saveBtn.style.color = "white";
+      saveBtn.classList.add('save-failed');
       console.error(error);
     });
   });
