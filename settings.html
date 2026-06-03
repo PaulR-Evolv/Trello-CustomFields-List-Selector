@@ -1,1 +1,35 @@
-test
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="stylesheet" href="https://p.trellocdn.com/power-up.min.css">
+  <style>
+    body { padding: 10px; }
+    
+    /* This styles your 'expanding bubbles' */
+    details { 
+      background: #F4F5F7; 
+      border-radius: 8px; 
+      margin-bottom: 8px; 
+      padding: 10px; 
+      cursor: pointer; 
+    }
+    summary { font-weight: bold; outline: none; }
+    
+    /* Styles the checkboxes inside the bubbles */
+    .cf-item { margin-top: 8px; margin-left: 20px; display: block; }
+    
+    #save-btn { margin-top: 15px; width: 100%; display: none; }
+    #loading { font-style: italic; color: #5e6c84; }
+  </style>
+</head>
+<body>
+  <div id="loading">Loading lists and custom fields...</div>
+  
+  <div id="lists-container"></div>
+  
+  <button id="save-btn" class="mod-primary">Save Display Settings</button>
+  
+  <script src="https://p.trellocdn.com/power-up.min.js"></script>
+  <script src="./settings.js"></script>
+</body>
+</html>
