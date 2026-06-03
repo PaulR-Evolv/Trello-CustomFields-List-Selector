@@ -3,14 +3,15 @@ const t = window.TrelloPowerUp.iframe();
 
 // Ask Trello for the Lists, Custom Fields, and any previously saved settings
 Promise.all([
-  t.board('lists', 'customFields'),
+  t.lists('all'), // <-- THIS IS THE FIX! We now ask for lists correctly.
+  t.board('customFields'),
   t.get('board', 'shared', 'listFieldSettings', {})
 ]).then(function(results) {
-  const boardData = results[0];
-  const savedSettings = results[1];
   
-  const lists = boardData.lists || [];
+  const lists = results[0] || [];
+  const boardData = results[1] || {};
   const customFields = boardData.customFields || [];
+  const savedSettings = results[2] || {};
   
   const container = document.getElementById('lists-container');
   const loading = document.getElementById('loading');
@@ -73,4 +74,9 @@ Promise.all([
       t.closePopup();
     });
   });
+  
+}).catch(function(err) {
+  // 🚨 Safety Net: If Trello rejects the request, show an error!
+  console.error("Error loading settings:", err);
+  document.getElementById('loading').innerText = "Oops! Something went wrong loading the data. Please close and try again.";
 });
