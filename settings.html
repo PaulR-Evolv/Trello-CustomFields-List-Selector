@@ -28,9 +28,23 @@
       padding: 10px; 
       cursor: pointer; 
     }
-    summary { font-weight: bold; outline: none; }
     
-    .cf-item { margin-top: 8px; margin-left: 20px; display: block; }
+    /* 🚨 UPDATED: Darkened list header text to Trello's premium high-contrast navy */
+    summary { 
+      font-weight: bold; 
+      outline: none; 
+      color: #172B4D; 
+      font-size: 14px;
+    }
+    
+    /* 🚨 UPDATED: Darkened the custom field text labels for easier reading */
+    .cf-item { 
+      margin-top: 8px; 
+      margin-left: 20px; 
+      display: block; 
+      color: #42526E; 
+      font-weight: 500;
+    }
     
     #footer {
       padding: 15px;
@@ -43,10 +57,9 @@
     #save-btn { 
       width: 100%; 
       margin: 0; 
-      transition: all 0.2s ease; /* Makes the color swap look silky smooth */
+      transition: all 0.2s ease; 
     }
 
-    /* 🚨 NEW: Pure CSS classes for success and failure states */
     #save-btn.save-success {
       background-color: #61BD4F !important;
       border-color: #61BD4F !important;
@@ -70,6 +83,6 @@
   </div>
   
   <script src="https://p.trellocdn.com/power-up.min.js"></script>
-  <script src="./settings.js?v=8"></script>
+  <script src="./settings.js?v=9"></script>
 </body>
 </html>
