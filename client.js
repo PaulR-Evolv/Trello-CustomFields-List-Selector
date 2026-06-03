@@ -19,21 +19,35 @@ window.TrelloPowerUp.initialize({
   
   // 1. TURN ON THE SETTINGS GEAR ICON
   'show-settings': function(t, options) {
-    return t.popup({
-      title: 'Dynamic Field Display',
-      url: './settings.html',
-      height: 450 // Controls how tall the pop-up window is
+    
+    // 🚨 NEW LOGIC: Ask Trello for the data HERE in the background, not in the popup!
+    return Promise.all([
+      t.lists('all').catch(() => []),
+      t.board('customFields').catch(() => ({ customFields: [] })),
+      t.get('board', 'shared', 'listFieldSettings', {})
+    ]).then(function(results) {
+      
+      // Open the popup and pass the data directly into it!
+      return t.popup({
+        title: 'Dynamic Field Display',
+        url: './settings.html',
+        height: 450,
+        args: { 
+          lists: results[0] || [],
+          customFields: (results[1] && results[1].customFields) ? results[1].customFields : [],
+          savedSettings: results[2] || {}
+        }
+      });
     });
   },
 
   // 2. GENERATE THE BADGES BASED ON SETTINGS
   'card-badges': function(t, options) {
-    
     return Promise.all([
       t.list('id').catch(() => null),
       t.board('customFields').catch(() => null),
       t.card('customFieldItems').catch(() => null),
-      t.get('board', 'shared', 'listFieldSettings', {}) // Read the saved settings database!
+      t.get('board', 'shared', 'listFieldSettings', {}) 
     ])
     .then(function(results) {
       const currentList = results[0] || {};
@@ -43,14 +57,12 @@ window.TrelloPowerUp.initialize({
       
       const listId = currentList.id;
       
-      // If the current list has no settings saved, ignore it and return empty
       if (!listId || !savedSettings[listId] || savedSettings[listId].length === 0) {
         return [];
       }
       
       let badges = [];
       
-      // Look at the specific Custom Fields the user checked for this exact list
       savedSettings[listId].forEach(targetCfId => {
         let fieldDef = boardCustomFields.find(cf => cf.id === targetCfId);
         let cardItem = cardCustomFields.find(item => item.idCustomField === targetCfId);
@@ -61,7 +73,7 @@ window.TrelloPowerUp.initialize({
           if (valueText) {
             badges.push({
               text: fieldDef.name + ": " + valueText,
-              color: 'light-gray' // Sleek, native-looking grey label
+              color: 'light-gray' 
             });
           }
         }
