@@ -6,7 +6,6 @@ const footer = document.getElementById('footer');
 const saveBtn = document.getElementById('save-btn');
 
 try {
-  // Read the data that client.js handed to us
   const lists = t.arg('lists') || [];
   const customFields = t.arg('customFields') || [];
   const savedSettings = t.arg('savedSettings') || {};
@@ -14,7 +13,6 @@ try {
   if (lists.length === 0) {
     loading.innerText = "No lists found. Please close and try again.";
   } else {
-    // Build the UI
     lists.forEach(list => {
       let details = document.createElement('details');
       let summary = document.createElement('summary');
@@ -30,7 +28,6 @@ try {
         checkbox.dataset.listId = list.id;
         checkbox.dataset.cfId = cf.id;
         
-        // Check the box if they saved it previously
         if (savedSettings[list.id] && savedSettings[list.id].includes(cf.id)) {
           checkbox.checked = true;
         }
@@ -43,7 +40,6 @@ try {
       container.appendChild(details);
     });
     
-    // Reveal the Interface and the footer!
     loading.style.display = 'none';
     footer.style.display = 'flex';
   }
@@ -61,22 +57,23 @@ try {
       newSettings[lId].push(cfId);
     });
     
-    // 🚨 NEW LOGIC: Try to save, but catch the error if Trello blocks it!
     t.set('board', 'shared', 'listFieldSettings', newSettings)
     .then(function() {
-      // If successful, close the pop-up
-      return t.closePopup();
-    })
-    .catch(function(error) {
-      // If Trello blocks it, turn the button red and print the error to the screen
-      saveBtn.innerText = "Save Failed!";
-      saveBtn.style.backgroundColor = "#EB5A46"; // Trello Red
+      // 🚨 FIX: Visually show success immediately so it never freezes
+      saveBtn.innerText = "✅ Saved Successfully!";
+      saveBtn.style.backgroundColor = "#61BD4F"; // Trello Green
       saveBtn.style.color = "white";
       
-      loading.innerText = "Trello Error: " + (error.message || JSON.stringify(error));
-      loading.style.display = 'block';
-      loading.style.color = '#EB5A46';
-      loading.style.fontWeight = 'bold';
+      // Smoothly close the popup after 800 milliseconds
+      setTimeout(function() {
+        t.closePopup();
+      }, 800);
+    })
+    .catch(function(error) {
+      saveBtn.innerText = "Save Failed!";
+      saveBtn.style.backgroundColor = "#EB5A46"; 
+      saveBtn.style.color = "white";
+      console.error(error);
     });
   });
 
