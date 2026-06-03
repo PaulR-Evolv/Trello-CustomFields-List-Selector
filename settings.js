@@ -61,16 +61,17 @@ try {
     
     t.set('board', 'shared', 'listFieldSettings', newSettings)
     .then(function() {
-      // 🚨 VISUAL CONFIRMATION: Turn green instantly
+      // 1. Turn green instantly on success
       saveBtn.innerText = "✅ Saved Successfully!";
       saveBtn.style.backgroundColor = "#61BD4F"; // Trello Green
+      saveBtn.style.borderColor = "#61BD4F";
       saveBtn.style.color = "white";
       
-      // 🚨 THE FIX: Wait 2 seconds, then revert the button back to original state
+      // 2. Wait exactly 2 seconds, then execute the ironclad reset
       setTimeout(function() {
         saveBtn.innerText = "Save Display Settings";
-        saveBtn.style.backgroundColor = ""; // Wipes out inline green style
-        saveBtn.style.color = ""; // Wipes out inline white style
+        // 🚨 Wipes out ALL temporary inline styles completely, restoring the native Trello blue
+        saveBtn.style.cssText = ""; 
       }, 2000);
     })
     .catch(function(error) {
