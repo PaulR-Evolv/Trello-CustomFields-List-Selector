@@ -80,3 +80,4 @@ try {
 } catch (error) {
   loading.innerText = "Fatal JS Error: " + (error.message || error);
 }
+ 
