@@ -19,15 +19,12 @@ window.TrelloPowerUp.initialize({
   
   // 1. TURN ON THE SETTINGS GEAR ICON
   'show-settings': function(t, options) {
-    
-    // 🚨 NEW LOGIC: Ask Trello for the data HERE in the background, not in the popup!
     return Promise.all([
       t.lists('all').catch(() => []),
       t.board('customFields').catch(() => ({ customFields: [] })),
       t.get('board', 'shared', 'listFieldSettings', {})
     ]).then(function(results) {
       
-      // Open the popup and pass the data directly into it!
       return t.popup({
         title: 'Dynamic Field Display',
         url: './settings.html',
@@ -51,10 +48,15 @@ window.TrelloPowerUp.initialize({
     ])
     .then(function(results) {
       const currentList = results[0] || {};
-      const boardCustomFields = results[1] || [];
-      const cardCustomFields = results[2] || [];
-      const savedSettings = results[3] || {};
       
+      // 🚨 FIX: Correctly unwrap Trello's object structure into clean arrays
+      const boardData = results[1] || {};
+      const boardCustomFields = boardData.customFields || [];
+      
+      const cardData = results[2] || {};
+      const cardCustomFields = cardData.customFieldItems || [];
+      
+      const savedSettings = results[3] || {};
       const listId = currentList.id;
       
       if (!listId || !savedSettings[listId] || savedSettings[listId].length === 0) {
@@ -82,9 +84,8 @@ window.TrelloPowerUp.initialize({
       return badges;
     })
     .catch(err => {
-      console.error(err);
+      console.error("Badge Error:", err);
       return [];
     });
   }
 });
- 
