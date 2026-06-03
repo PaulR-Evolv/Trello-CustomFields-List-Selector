@@ -87,3 +87,4 @@ window.TrelloPowerUp.initialize({
     });
   }
 });
+ 
