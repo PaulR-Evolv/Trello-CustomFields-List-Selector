@@ -7,18 +7,18 @@ try {
   const t = window.TrelloPowerUp.iframe();
   loading.innerText = "Step 2: Connected to Trello...";
 
-  // Step 3: Ask Trello for the data
+  // Step 3: Ask Trello for the data correctly!
   Promise.all([
-    t.board('lists', 'customFields'),
+    t.lists('all'),
+    t.board('customFields'),
     t.get('board', 'shared', 'listFieldSettings', {})
   ]).then(function(results) {
     loading.innerText = "Step 3: Data received! Building UI...";
     
-    const boardData = results[0] || {};
-    const savedSettings = results[1] || {};
-    
-    const lists = boardData.lists || [];
+    const lists = results[0] || [];
+    const boardData = results[1] || {};
     const customFields = boardData.customFields || [];
+    const savedSettings = results[2] || {};
     
     const container = document.getElementById('lists-container');
     const saveBtn = document.getElementById('save-btn');
@@ -39,6 +39,7 @@ try {
         checkbox.dataset.listId = list.id;
         checkbox.dataset.cfId = cf.id;
         
+        // Check it if the user saved it previously
         if (savedSettings[list.id] && savedSettings[list.id].includes(cf.id)) {
           checkbox.checked = true;
         }
