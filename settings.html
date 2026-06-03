@@ -3,7 +3,25 @@
 <head>
   <link rel="stylesheet" href="https://p.trellocdn.com/power-up.min.css">
   <style>
-    body { padding: 10px; }
+    /* Lock the body size and use flexbox to structure the layout */
+    body { 
+      margin: 0; 
+      padding: 0; 
+      height: 100vh; /* Fills the exact height of the Trello iframe */
+      display: flex; 
+      flex-direction: column; 
+      overflow: hidden; /* Stops the whole page from scrolling */
+      background-color: #ffffff;
+    }
+    
+    #loading { padding: 10px; font-style: italic; color: #5e6c84; }
+    
+    /* The scrollable middle section */
+    #lists-container { 
+      flex: 1; /* Pushes the footer down and takes up the remaining space */
+      overflow-y: auto; /* Adds a scrollbar JUST to this section */
+      padding: 10px; 
+    }
     
     details { 
       background: #F4F5F7; 
@@ -16,8 +34,19 @@
     
     .cf-item { margin-top: 8px; margin-left: 20px; display: block; }
     
-    #save-btn { margin-top: 15px; width: 100%; display: none; }
-    #loading { font-style: italic; color: #5e6c84; }
+    /* The new pinned footer section */
+    #footer {
+      padding: 15px;
+      background: #ffffff;
+      border-top: 1px solid #dfe1e6; /* A clean line to separate it from the scroll */
+      display: none; /* Hidden until data loads */
+      justify-content: center;
+    }
+
+    #save-btn { 
+      width: 100%; 
+      margin: 0; 
+    }
   </style>
 </head>
 <body>
@@ -25,9 +54,11 @@
   
   <div id="lists-container"></div>
   
-  <button id="save-btn" class="mod-primary">Save Display Settings</button>
+  <div id="footer">
+    <button id="save-btn" class="mod-primary">Save Display Settings</button>
+  </div>
   
   <script src="https://p.trellocdn.com/power-up.min.js"></script>
-  <script src="./settings.js?v=3"></script>
+  <script src="./settings.js?v=4"></script>
 </body>
 </html>
