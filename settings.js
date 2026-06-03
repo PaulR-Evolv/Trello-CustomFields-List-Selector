@@ -6,6 +6,7 @@ const footer = document.getElementById('footer');
 const saveBtn = document.getElementById('save-btn');
 
 try {
+  // Read the data that client.js handed to us
   const lists = t.arg('lists') || [];
   const customFields = t.arg('customFields') || [];
   const savedSettings = t.arg('savedSettings') || {};
@@ -13,6 +14,7 @@ try {
   if (lists.length === 0) {
     loading.innerText = "No lists found. Please close and try again.";
   } else {
+    // Build the UI
     lists.forEach(list => {
       let details = document.createElement('details');
       let summary = document.createElement('summary');
@@ -59,15 +61,17 @@ try {
     
     t.set('board', 'shared', 'listFieldSettings', newSettings)
     .then(function() {
-      // 🚨 FIX: Visually show success immediately so it never freezes
+      // 🚨 VISUAL CONFIRMATION: Turn green instantly
       saveBtn.innerText = "✅ Saved Successfully!";
       saveBtn.style.backgroundColor = "#61BD4F"; // Trello Green
       saveBtn.style.color = "white";
       
-      // Smoothly close the popup after 800 milliseconds
+      // 🚨 THE FIX: Wait 2 seconds, then revert the button back to original state
       setTimeout(function() {
-        t.closePopup();
-      }, 800);
+        saveBtn.innerText = "Save Display Settings";
+        saveBtn.style.backgroundColor = ""; // Wipes out inline green style
+        saveBtn.style.color = ""; // Wipes out inline white style
+      }, 2000);
     })
     .catch(function(error) {
       saveBtn.innerText = "Save Failed!";
