@@ -21,42 +21,45 @@ window.TrelloPowerUp.initialize({
   'show-settings': function(t, options) {
     return Promise.all([
       t.lists('all').catch(() => []),
-      t.board('customFields').catch(() => ({ customFields: [] })),
-      t.get('board', 'shared', 'listFieldSettings', {})
+      t.board('customFields').catch(() => []),
+      t.get('board', 'shared', 'listFieldSettings', {}),
+      t.get('board', 'shared', 'fieldColorSettings', { adoptNative: false, colors: {} }) // Fetch global colors
     ]).then(function(results) {
       
+      // Open the popup and inject all data packages
       return t.popup({
         title: 'Dynamic Field Display',
         url: './settings.html',
         height: 450,
         args: { 
           lists: results[0] || [],
-          customFields: (results[1] && results[1].customFields) ? results[1].customFields : [],
-          savedSettings: results[2] || {}
+          customFields: Array.isArray(results[1]) ? results[1] : (results[1].customFields || []),
+          savedSettings: results[2] || {},
+          fieldColorSettings: results[3] || { adoptNative: false, colors: {} }
         }
       });
     });
   },
 
-  // 2. GENERATE THE BADGES BASED ON SETTINGS
+  // 2. GENERATE THE BADGES BASED ON ADVANCED COLOR LOGIC
   'card-badges': function(t, options) {
     return Promise.all([
       t.list('id').catch(() => null),
-      t.board('customFields').catch(() => null),
-      t.card('customFieldItems').catch(() => null),
-      t.get('board', 'shared', 'listFieldSettings', {}) 
+      t.board('customFields').catch(() => []),
+      t.card('customFieldItems').catch(() => []),
+      t.get('board', 'shared', 'listFieldSettings', {}),
+      t.get('board', 'shared', 'fieldColorSettings', { adoptNative: false, colors: {} }) 
     ])
     .then(function(results) {
       const currentList = results[0] || {};
       
-      // 🚨 FIX: Correctly unwrap Trello's object structure into clean arrays
-      const boardData = results[1] || {};
-      const boardCustomFields = boardData.customFields || [];
-      
-      const cardData = results[2] || {};
-      const cardCustomFields = cardData.customFieldItems || [];
+      // Defensive checks to make sure Trello data maps cleanly as Arrays
+      const boardCustomFields = Array.isArray(results[1]) ? results[1] : (results[1].customFields || []);
+      const cardCustomFields = Array.isArray(results[2]) ? Array.isArray(results[2]) ? results[2] : [] : (results[2].customFieldItems || []);
       
       const savedSettings = results[3] || {};
+      const fieldColorSettings = results[4] || { adoptNative: false, colors: {} };
+      
       const listId = currentList.id;
       
       if (!listId || !savedSettings[listId] || savedSettings[listId].length === 0) {
@@ -73,9 +76,26 @@ window.TrelloPowerUp.initialize({
           let valueText = getFieldValue(cardItem, fieldDef);
           
           if (valueText) {
+            // 🚨 ADVANCED COLOR PICKER LOGIC
+            let badgeColor = 'light-gray'; // Default fallback color
+            
+            // Check Rule A: If "Adopt Native Colors" is true AND this is a dropdown field with a choice
+            if (fieldColorSettings.adoptNative && cardItem.idValue && fieldDef.options) {
+              let selectedOption = fieldDef.options.find(opt => opt.id === cardItem.idValue);
+              if (selectedOption && selectedOption.color) {
+                badgeColor = selectedOption.color; // Pull native color mapping
+              } else if (fieldColorSettings.colors && fieldColorSettings.colors[targetCfId]) {
+                badgeColor = fieldColorSettings.colors[targetCfId]; // Fall back to user custom map if no native color
+              }
+            } 
+            // Check Rule B: Go directly to user custom manual setting override
+            else if (fieldColorSettings.colors && fieldColorSettings.colors[targetCfId]) {
+              badgeColor = fieldColorSettings.colors[targetCfId];
+            }
+            
             badges.push({
               text: fieldDef.name + ": " + valueText,
-              color: 'light-gray' 
+              color: badgeColor 
             });
           }
         }
@@ -84,7 +104,7 @@ window.TrelloPowerUp.initialize({
       return badges;
     })
     .catch(err => {
-      console.error("Badge Error:", err);
+      console.error("Badge Render Error:", err);
       return [];
     });
   }
